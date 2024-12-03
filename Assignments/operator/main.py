@@ -1,0 +1,6 @@
+# oefening met de operator
+
+
+
+
+

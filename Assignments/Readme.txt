@@ -1,0 +1,1 @@
+Deze folder is voor het maken van opdrachten van de Winc Academey.

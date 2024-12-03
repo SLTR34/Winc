@@ -1,0 +1,60 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        source venv/bin/activate
+        pytest
+
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+      
+    steps:
+    - name: Deploy to VPS
+      if: success()
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_IP }}
+        port: ${{ secrets.PORT }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          cd /var/www/myflaskapp
+          cd /root/home/farm/
+          git pull
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          systemctl restart flaskapp
+          systemctl restart nginx
+          systemctl status flaskapp
+          systemctl status nginx
+          
